@@ -24,11 +24,7 @@ public class ProductController {
 
 
 
-    @GetMapping("/id_check")
-    public String sessionIdCheck(HttpServletRequest http){
-        return "The session id is: "+ http.getSession().getId();
 
-    }
 
 
     //Get all products CONTROLLER
