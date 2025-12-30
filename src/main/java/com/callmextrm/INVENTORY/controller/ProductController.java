@@ -2,8 +2,9 @@ package com.callmextrm.INVENTORY.controller;
 
 
 import com.callmextrm.INVENTORY.entity.Product;
-import com.callmextrm.INVENTORY.entity.QuantityDTO;
+import com.callmextrm.INVENTORY.dto.QuantityDTO;
 import com.callmextrm.INVENTORY.service.ProductService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/products")
 public class ProductController {
     private final ProductService productService;
 
@@ -18,39 +20,50 @@ public class ProductController {
         this.productService = product;
     }
 
+
+
+
+
+    @GetMapping("/id_check")
+    public String sessionIdCheck(HttpServletRequest http){
+        return "The session id is: "+ http.getSession().getId();
+
+    }
+
+
     //Get all products CONTROLLER
-    @GetMapping("/products")
+    @GetMapping("")
     public List<Product> getAllProducts(){
        return productService.getAllProducts();
     }
 
     //Get product By Id CONTROLLER
-    @GetMapping("/products/{id}")
+    @GetMapping("{id}")
     public Optional<Product> getProductById(@PathVariable Long id){
         return productService.getProductById(id);
     }
 
     //Add product CONTROLLER
-    @PostMapping("/products")
+    @PostMapping("")
     public Product addProduct(@Valid @RequestBody Product product){
         return productService.addProduct(product);
     }
 
     //Delete product CONTROLLER
-    @DeleteMapping("/products/{id}")
+    @DeleteMapping("{id}")
     public void deleteProduct(@PathVariable Long id){
         productService.deleteProduct(id);
     }
 
     //Update product CONTROLLER
-    @PatchMapping("/products/{id}")
+    @PatchMapping("{id}")
     public Product updateProduct(@PathVariable Long id, @RequestBody QuantityDTO quantity){
         return productService.updateProduct(id, quantity.getQuantity());
     }
 
 
     //Discontinue products Controller
-    @PatchMapping("/products/{id}/discontinue")
+    @PatchMapping("{id}/discontinue")
     public Product discontinueProduct(@PathVariable Long id){
         return productService.DiscontinueProducts(id);
     }

@@ -1,0 +1,36 @@
+package com.callmextrm.INVENTORY.service;
+
+import com.callmextrm.INVENTORY.entity.Role;
+import com.callmextrm.INVENTORY.exception.RolesException;
+import com.callmextrm.INVENTORY.repository.RolesRepo;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class RolesService {
+    private final RolesRepo rolesdao;
+
+    public RolesService(RolesRepo rolesdao) {
+        this.rolesdao = rolesdao;
+    }
+
+    //Show all roles SERVICE
+    public List<Role> showAllRoles(){
+        return rolesdao.findAll();
+    }
+
+    //Add role SERVICE
+    public Role addRole(Role role){
+        return rolesdao.save(role);
+    }
+
+    //Update role SERVICE
+    public Role updateRole(Long id,Role newRole){
+        Role role = rolesdao.findById(id).orElseThrow(()-> new RolesException("Wrong role id"));
+        role.setRolename(newRole.getRolename());
+        return rolesdao.save(role);
+
+    }
+
+}
