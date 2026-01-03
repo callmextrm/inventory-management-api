@@ -1,7 +1,7 @@
 package com.callmextrm.INVENTORY.service;
 
 import com.callmextrm.INVENTORY.entity.Role;
-import com.callmextrm.INVENTORY.exception.RolesException;
+import com.callmextrm.INVENTORY.exception.Exceptions.ResourceNotFound;
 import com.callmextrm.INVENTORY.repository.RolesRepo;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,7 @@ public class RolesService {
 
     //Update role SERVICE
     public Role updateRole(Long id,Role newRole){
-        Role role = rolesdao.findById(id).orElseThrow(()-> new RolesException("Wrong role id"));
+        Role role = rolesdao.findById(id).orElseThrow(()-> new ResourceNotFound("Wrong role id"));
         role.setRolename(newRole.getRolename());
         return rolesdao.save(role);
 

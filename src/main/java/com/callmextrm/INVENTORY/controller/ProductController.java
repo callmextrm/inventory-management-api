@@ -4,12 +4,12 @@ package com.callmextrm.INVENTORY.controller;
 import com.callmextrm.INVENTORY.entity.Product;
 import com.callmextrm.INVENTORY.dto.QuantityDTO;
 import com.callmextrm.INVENTORY.service.ProductService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/products")
@@ -22,46 +22,47 @@ public class ProductController {
 
 
 
-
-
-
-
-
     //Get all products CONTROLLER
-    @GetMapping("")
-    public List<Product> getAllProducts(){
-       return productService.getAllProducts();
+    @GetMapping
+    public ResponseEntity<List<Product>> getAllProducts(){
+        return ResponseEntity.ok(productService.getAllProducts());
     }
 
     //Get product By Id CONTROLLER
     @GetMapping("{id}")
-    public Optional<Product> getProductById(@PathVariable Long id){
-        return productService.getProductById(id);
+    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.getProductById(id));
     }
 
     //Add product CONTROLLER
     @PostMapping("")
-    public Product addProduct(@Valid @RequestBody Product product){
-        return productService.addProduct(product);
+    public ResponseEntity<Product> addProduct(@Valid @RequestBody Product product){
+        Product saved = productService.addProduct(product);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(saved);
     }
 
     //Delete product CONTROLLER
     @DeleteMapping("{id}")
-    public void deleteProduct(@PathVariable Long id){
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id){
         productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
     }
 
     //Update product CONTROLLER
     @PatchMapping("{id}")
-    public Product updateProduct(@PathVariable Long id, @RequestBody QuantityDTO quantity){
-        return productService.updateProduct(id, quantity.getQuantity());
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id,
+                                                 @RequestBody QuantityDTO quantity){
+        Product product = productService.updateProduct(id, quantity.quantity());
+        return ResponseEntity.ok(product);
     }
 
 
     //Discontinue products Controller
     @PatchMapping("{id}/discontinue")
-    public Product discontinueProduct(@PathVariable Long id){
-        return productService.DiscontinueProducts(id);
+    public ResponseEntity<Product> discontinueProduct(@PathVariable Long id){
+        return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
+                .body(productService.discontinueProduct(id));
     }
-
     }

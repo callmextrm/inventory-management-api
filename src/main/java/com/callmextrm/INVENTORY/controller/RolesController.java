@@ -2,6 +2,7 @@ package com.callmextrm.INVENTORY.controller;
 
 import com.callmextrm.INVENTORY.entity.Role;
 import com.callmextrm.INVENTORY.service.RolesService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,13 +24,13 @@ public class RolesController {
 
     //Add role CONTROLLER
     @PostMapping("add")
-    public Role addController(@RequestBody Role role){
+    public Role addController(@Valid @RequestBody Role role){
         return service.addRole(role);
     }
 
     //Update role CONTROLLER
     @PutMapping("/update/{id}")
-    public Role updateRole(@PathVariable Long id,@RequestBody Role role){
+    public Role updateRole(@Valid @PathVariable Long id,@RequestBody Role role){
         return service.updateRole(id,role);
     }
 }

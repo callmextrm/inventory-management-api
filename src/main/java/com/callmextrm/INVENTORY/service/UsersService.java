@@ -1,19 +1,23 @@
 package com.callmextrm.INVENTORY.service;
 
-import com.callmextrm.INVENTORY.dto.RoleToUser;
+import com.callmextrm.INVENTORY.dto.UserDto.RoleToUser;
+import com.callmextrm.INVENTORY.dto.UserDto.UserDto;
+import com.callmextrm.INVENTORY.dto.UserDto.UserRegisterDto;
+import com.callmextrm.INVENTORY.dto.UserDto.UserUpdateDto;
 import com.callmextrm.INVENTORY.entity.Role;
 import com.callmextrm.INVENTORY.entity.Users;
-import com.callmextrm.INVENTORY.exception.RolesException;
-import com.callmextrm.INVENTORY.exception.UserException;
+import com.callmextrm.INVENTORY.exception.Exceptions.Password;
+import com.callmextrm.INVENTORY.exception.Exceptions.ResourceAlreadyFound;
+import com.callmextrm.INVENTORY.exception.Exceptions.ResourceNotFound;
 import com.callmextrm.INVENTORY.repository.RolesRepo;
 import com.callmextrm.INVENTORY.repository.UserRepo;
 import jakarta.transaction.Transactional;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -21,6 +25,16 @@ public class UsersService {
     private final UserRepo userdao;
     private final RolesRepo rolesdao;
     private final PasswordEncoder encoder;
+    private UserDto toDto(Users user) {
+        Set<String> roles = user.getRoles()
+                .stream()
+                .map(Role::getRolename)
+                .collect(Collectors.toSet());
+        return new UserDto(
+                user.getId(),
+                user.getUsername(),
+                roles
+        );}
 
     public UsersService(UserRepo userdao, RolesRepo rolesdao, PasswordEncoder encoder) {
         this.userdao = userdao;
@@ -30,65 +44,86 @@ public class UsersService {
 
 
     //Show Users Service
-    public List<Users> showUsers(){
-        return userdao.findAll();
+    public List<UserDto> showUsers() {
+        return userdao.findAll()
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
 
     //Register Service
-    public Users register(Users user){
-        if (userdao.existsByUsername(user.getUsername())){
-            throw new UserException("User already registered");
-        }{if (user.getPassword()==null || user.getPassword().isEmpty()){
-            throw new UserException("Password required");
+    public UserDto register(UserRegisterDto dto){
+        if (userdao.existsByUsername(dto.username())){
+            throw new ResourceAlreadyFound("User already registered");
         }
-        String pw = encoder.encode(user.getPassword());
-        user.setPassword(pw);
-        return userdao.save(user);}
+        Users user = new Users();
+        user.setUsername(dto.username());
+        user.setPassword(encoder.encode(dto.password()));
+
+        {if (dto.password()==null || dto.password().isEmpty()){
+            throw new Password("Password required");
+        }
+            Users saved = userdao.save(user);
+        return toDto(saved);}
     }
 
     //Update Credentiels Service
-    public Users updateUser(Long id,Users newuser){
-        Users user = userdao.findById(id).orElseThrow(()-> new UsernameNotFoundException("User not found"));
+    public UserDto updateUser(Long id, UserUpdateDto dto){
+        Users user = userdao.findById(id).orElseThrow(()-> new ResourceNotFound("User not found"));
 
-        if (userdao.existsByUsername(newuser.getUsername())==true && !user.getUsername().equals(newuser.getUsername())){
-            throw new UserException("Username already used");
+        if (userdao.existsByUsername(dto.username()) && !user.getUsername().equals(dto.username())){
+            throw new ResourceAlreadyFound("Username already used");
 
         }
-        user.setUsername(newuser.getUsername());
-        if (newuser.getPassword() == null || newuser.getPassword().isEmpty()){
-            throw new UserException("Password is required");
+        user.setUsername(dto.username());
+        Users saved = userdao.save(user);
 
-    } else user.setPassword(encoder.encode(newuser.getPassword()));
-        return userdao.save(user);
+        return toDto(saved);
 
 
 
     }
 
     //Link role to User
-    public void roleToUser(RoleToUser roleToUser){
+    public void roleToUser(RoleToUser dto){
+        Users user = userdao.findByUsername(dto.username());
+        if (user == null){
+            throw new ResourceNotFound("User not found");
+        }
 
-        Users user = userdao.findByUsername(roleToUser.getUsername());
-        Role role = rolesdao.findByRolename(roleToUser.getRolename());
+        Role role = rolesdao.findByRolename(dto.rolename());
+        if (role == null ){
+            throw new ResourceNotFound("Role not found");
+
+        }
         user.getRoles().add(role);
+        userdao.save(user);
     }
 
     //Update User's role
-    public void updateUserRole(RoleToUser roleToUser){
-        Users user = userdao.findByUsername(roleToUser.getUsername());
-        Role role = rolesdao.findByRolename(roleToUser.getRolename());
+    public void updateUserRole(RoleToUser dto){
+        Users user = userdao.findByUsername(dto.username());
+        Role role = rolesdao.findByRolename(dto.rolename());
         if (user.getRoles().isEmpty()) {
-            throw new UserException("User has no roles to replace");}
+            throw new ResourceNotFound("User has no roles");}
 
-        if (!rolesdao.existsByRolename(roleToUser.getUsername())) {
-            throw new RolesException("Role not found: " + roleToUser.getRolename());}
+        if (!rolesdao.existsByRolename(dto.rolename())) {
+            throw new ResourceNotFound("Role not found: " + dto.rolename());}
 
 
         user.getRoles().clear();
         user.getRoles().add(role);
+        userdao.save(user);
+
+    }
 
 
+    //Delete User
+    public void deleteUser(Long id){
+        userdao.findById(id).orElseThrow(()-> new ResourceNotFound("Username not found"));
+        userdao.deleteById(id);
+    }
 
 
-    }}
+}
