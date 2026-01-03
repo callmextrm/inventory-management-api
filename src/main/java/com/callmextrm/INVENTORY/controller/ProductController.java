@@ -2,7 +2,7 @@ package com.callmextrm.INVENTORY.controller;
 
 
 import com.callmextrm.INVENTORY.entity.Product;
-import com.callmextrm.INVENTORY.dto.QuantityDTO;
+import com.callmextrm.INVENTORY.dto.ProductDto.QuantityDTO;
 import com.callmextrm.INVENTORY.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -53,7 +53,7 @@ public class ProductController {
     //Update product CONTROLLER
     @PatchMapping("{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable Long id,
-                                                 @RequestBody QuantityDTO quantity){
+                                                 @Valid @RequestBody QuantityDTO quantity){
         Product product = productService.updateProduct(id, quantity.quantity());
         return ResponseEntity.ok(product);
     }

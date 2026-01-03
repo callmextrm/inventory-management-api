@@ -4,7 +4,6 @@ import com.callmextrm.INVENTORY.dto.UserDto.RoleToUser;
 import com.callmextrm.INVENTORY.dto.UserDto.UserDto;
 import com.callmextrm.INVENTORY.dto.UserDto.UserRegisterDto;
 import com.callmextrm.INVENTORY.dto.UserDto.UserUpdateDto;
-import com.callmextrm.INVENTORY.entity.Users;
 import com.callmextrm.INVENTORY.service.UsersService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -31,7 +30,7 @@ public class UserController {
 
 
     //Register Controller
-    @PostMapping
+    @PostMapping("register")
     public ResponseEntity<UserDto> register(@Valid @RequestBody UserRegisterDto user){
         return ResponseEntity.status(HttpStatus.CREATED).body(usersService.register(user));
     }

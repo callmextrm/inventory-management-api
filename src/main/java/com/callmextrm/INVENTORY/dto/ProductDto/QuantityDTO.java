@@ -1,6 +1,5 @@
-package com.callmextrm.INVENTORY.dto;
+package com.callmextrm.INVENTORY.dto.ProductDto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 

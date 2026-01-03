@@ -21,7 +21,7 @@ public class ProductService {
     public Product addProduct(Product product){
         if (product.getQuantity()>=0){
         product.setStatus(Status.Active);}
-        else throw new Quantity("Quantity can't be negative");
+        else throw new Quantity("Quantity can't is negative");
 
         return productDao.save(product);
     }

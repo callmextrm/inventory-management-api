@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table (name = "inv_product")
 @Data
@@ -15,7 +17,7 @@ public class Product {
     private String name;
     private Integer quantity;
     @Positive
-    private Double price;
+    private BigDecimal price;
     @Enumerated
     private Status status;
 
