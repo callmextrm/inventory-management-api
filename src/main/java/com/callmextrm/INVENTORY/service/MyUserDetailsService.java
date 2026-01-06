@@ -1,6 +1,7 @@
 package com.callmextrm.INVENTORY.service;
 
 import com.callmextrm.INVENTORY.entity.Users;
+import com.callmextrm.INVENTORY.exception.Exceptions.ResourceNotFound;
 import com.callmextrm.INVENTORY.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,11 +22,8 @@ public class MyUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Users user = userRepo.findByUsername(username);
-        if (user == null){
-            System.out.println("User not found");
-            throw new UsernameNotFoundException("User not found");
-        }
+        Users user = userRepo.findByUsername(username)
+                .orElseThrow(()-> new ResourceNotFound("User not found"));
         Set<GrantedAuthority> authorities = user.getRoles().stream().map(role ->
                 new SimpleGrantedAuthority("ROLE_"+ role.getRolename())).collect(Collectors.toSet());
 

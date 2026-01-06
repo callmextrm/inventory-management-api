@@ -15,12 +15,14 @@ import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
+
 public class UsersService {
     private final UserRepo userdao;
     private final RolesRepo rolesdao;
@@ -64,6 +66,18 @@ public class UsersService {
         {if (dto.password()==null || dto.password().isEmpty()){
             throw new Password("Password required");
         }
+            boolean firstUser = userdao.count() == 0;
+
+            String roleName = firstUser ? "ADMIN" : "USER";
+
+            Role role = rolesdao.findByRolename(roleName)
+                    .orElseGet(() -> rolesdao.save(new Role (roleName)));
+
+            if (user.getRoles() == null) {
+                user.setRoles(new HashSet<>());
+            }
+            user.getRoles().add(role);
+
             Users saved = userdao.save(user);
         return toDto(saved);}
     }
@@ -87,24 +101,25 @@ public class UsersService {
 
     //Link role to User
     public void roleToUser(RoleToUser dto){
-        Users user = userdao.findByUsername(dto.username());
+        Users user = userdao.findByUsername(dto.username())
+                .orElseThrow(()->new ResourceNotFound("User not found"));
         if (user == null){
             throw new ResourceNotFound("User not found");
         }
 
-        Role role = rolesdao.findByRolename(dto.rolename());
-        if (role == null ){
-            throw new ResourceNotFound("Role not found");
+        Role role = rolesdao.findByRolename(dto.rolename())
+                .orElseThrow(()->new ResourceNotFound("Role not found"));
 
-        }
         user.getRoles().add(role);
         userdao.save(user);
     }
 
     //Update User's role
     public void updateUserRole(RoleToUser dto){
-        Users user = userdao.findByUsername(dto.username());
-        Role role = rolesdao.findByRolename(dto.rolename());
+        Users user = userdao.findByUsername(dto.username())
+                .orElseThrow(()->new ResourceNotFound("User not found"));
+        Role role = rolesdao.findByRolename(dto.rolename())
+                .orElseThrow(()->new ResourceNotFound("Role not found"));
         if (user.getRoles().isEmpty()) {
             throw new ResourceNotFound("User has no roles");}
 

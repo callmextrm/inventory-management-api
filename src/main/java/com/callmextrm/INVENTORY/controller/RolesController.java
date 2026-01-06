@@ -23,7 +23,7 @@ public class RolesController {
     }
 
     //Add role CONTROLLER
-    @PostMapping("add")
+    @PostMapping("/add")
     public Role addController(@Valid @RequestBody Role role){
         return service.addRole(role);
     }
